@@ -53,6 +53,17 @@ def test_allocation_is_idempotent():
     batch.allocate(line)
     assert batch.available_quantity == 18
 
+def test_batches_with_same_reference_are_equal():
+    batch1 = Batch("batch-001", "SMALL-TABLE", qty=20, eta=date.today())
+    batch2 = Batch("batch-001", "SMALL-TABLE2", qty=20, eta=date.today())
+    assert batch1 == batch2
+
+def test_batches_with_same_reference_are_equal():
+    batch1 = Batch("batch-001", "SMALL-TABLE", qty=20, eta=date.today())
+    batch2 = Batch("batch-002", "SMALL-TABLE2", qty=20, eta=date.today())
+    assert batch1 != batch2
+
+
 #def test_prefers_warehouse_batches_to_shipments():
     
 
