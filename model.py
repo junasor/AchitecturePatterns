@@ -3,6 +3,15 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Optional, List, Set
 
+
+def allocate(line: OrderLine, Batches: List[Batch]):
+        try:
+            batch =  next(batch for batch in sorted(Batches) if batch.can_allocate(line))
+            batch.allocate(line)
+            return batch.reference
+        except StopIteration:
+            raise OutOfStock(f"Out of stock for sku {line.sku}")
+
 @dataclass(frozen=True)  #(1) (2)
 class OrderLine:
     orderid: str
@@ -25,11 +34,18 @@ class Batch:
 
     def __hash__(self):
         return hash(self.reference)
+    
+    def __gt__(self, other):
+        if self.eta is None:
+            return False
+        if other.eta is None:
+            return True
+        return self.eta > other.eta
 
     def allocate(self, line: OrderLine):
         if self.can_allocate(line):
             self._allocations.add(line)
-
+    
     def deallocate(self, line: OrderLine):
         if line in self._allocations:
             self._allocations.remove(line)
@@ -45,3 +61,5 @@ class Batch:
     def can_allocate(self, line: OrderLine) -> bool:
         return self.sku == line.sku and self.available_quantity >= line.qty
 
+class OutOfStock(Exception):
+    pass
